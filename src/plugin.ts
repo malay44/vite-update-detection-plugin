@@ -9,7 +9,7 @@ export type VitePluginVersionOptions = {
 function vitePluginVersion({ version }: VitePluginVersionOptions): Plugin {
   return {
     name: "vite-plugin-version",
-    version: "1.0.0",
+    version: "0.0.0",
     apply(config, env) {
       return env.command === "build" && !config.build?.ssr;
     },
@@ -17,7 +17,10 @@ function vitePluginVersion({ version }: VitePluginVersionOptions): Plugin {
       sequential: true,
       order: "post",
       handler({ dir }) {
-        if (!dir) return;
+        if (!dir) {
+          console.error("vite-plugin-version: No output directory found");
+          return;
+        }
         const file = path.resolve(dir, "version.json");
         const serializedVersion = JSON.stringify({ version });
         fs.writeFileSync(file, serializedVersion);
