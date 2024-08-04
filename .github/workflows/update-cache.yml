@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: echo
@@ -29,6 +29,6 @@ jobs:
           CI: true
 
       - name: Install dependencies
-        run: bash scripts/install.sh
+        run: npm ci
         env:
           CI: true
