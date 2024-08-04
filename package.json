@@ -8,10 +8,15 @@
     "vite-plugin"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "watch": "tsc -w",
+    "publish": "changeset publish",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@types/node": "^22.1.0",
+    "@types/react": "^18.3.3",
+    "@changesets/cli": "^2.27.7",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
