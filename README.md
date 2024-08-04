@@ -1,0 +1,1 @@
+## TODO: Include a section in the plugin docs detailing why it is a Vite only plugin (for example, it uses Vite specific plugin hooks).
