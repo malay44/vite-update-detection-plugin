@@ -3,11 +3,10 @@ name: Build and Version Pull Request
 
 on:
   workflow_dispatch:
-    branches: [main, releases]
 
 env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
 
 jobs:
   build-and-version-pull-request:
