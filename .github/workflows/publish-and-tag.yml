@@ -1,0 +1,75 @@
+# Used from XUI as it is
+name: Publish and Tag
+
+on:
+  workflow_dispatch:
+    branches: [main]
+
+env:
+  NPM_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+jobs:
+  publish-and-tag:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: bash scripts/install.sh
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
+
+      - name: Extract Version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Extracted version: $VERSION"
+          echo "::set-output name=VERSION::$VERSION"
+
+      - name: Get Changelog Content (Modified)
+        id: changelog
+        run: |
+          content=$(awk '/^###/{flag=1; next} /^##/{if(flag) exit} flag' CHANGELOG.md)
+          echo "::set-output name=CHANGELOG::$content"
+
+      - name: Print Output Values
+        run: |
+          echo "VERSION: ${{ steps.version.outputs.VERSION }}"
+          echo "CHANGELOG_CONTENT: ${{ steps.changelog.outputs.CHANGELOG }}"
+
+      - name: Publish package on NPM 📦
+        run: npm publish
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+        with:
+          tag_name: 'v${{ steps.version.outputs.VERSION }}'
+          release_name: 'Release v${{ steps.version.outputs.VERSION }}'
+          body: |
+            **Release Changes:**
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+          draft: false
+          prerelease: false
+
+      - name: Create Version Tag
+        run: |
+          git tag "v${{ steps.version.outputs.VERSION }}"
+          git push origin "v${{ steps.version.outputs.VERSION }}"
+          echo "Pushed tag: v${{ steps.version.outputs.VERSION }}"

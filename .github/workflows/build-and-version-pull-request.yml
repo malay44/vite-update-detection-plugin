@@ -1,0 +1,39 @@
+# Used from XUI as it is
+name: Build and Version Pull Request
+
+on:
+  workflow_dispatch:
+    branches: [main, releases]
+
+env:
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+jobs:
+  build-and-version-pull-request:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: bash scripts/install.sh
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: npm run release
