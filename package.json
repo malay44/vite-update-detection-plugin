@@ -1,17 +1,21 @@
 {
-  "name": "vite-update-detection-plugin",
-  "private": true,
-  "version": "0.0.0",
+  "name": "vite-plugin-update-detection",
+  "version": "0.0.1",
   "type": "module",
+  "main": "dist/plugin.js",
+  "types": "dist/plugin.d.ts",
+  "keywords": [
+    "vite-plugin"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^22.1.0",
-    "fs": "^0.0.1-security",
-    "typescript": "^5.2.2",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
     "vite": "^5.3.4"
   }
 }
