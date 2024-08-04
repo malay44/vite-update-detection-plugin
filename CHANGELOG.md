@@ -1,5 +1,11 @@
 # vite-plugin-update-detection
 
+## 0.1.1
+
+### Patch Changes
+
+- testing
+
 ## 0.1.0
 
 ### Minor Changes
