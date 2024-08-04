@@ -21,10 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
-        run: bash scripts/install.sh
+        run: npm ci
         env:
           CI: true
 
@@ -58,8 +58,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
         with:
-          tag_name: 'v${{ steps.version.outputs.VERSION }}'
-          release_name: 'Release v${{ steps.version.outputs.VERSION }}'
+          tag_name: "v${{ steps.version.outputs.VERSION }}"
+          release_name: "Release v${{ steps.version.outputs.VERSION }}"
           body: |
             **Release Changes:**
 
