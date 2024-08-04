@@ -6,7 +6,7 @@ on:
       - main
 env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
 
 jobs:
   update-cache:
