@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface ILookForVersionChange extends Function {
   (): Promise<boolean>;
@@ -7,53 +7,65 @@ interface ILookForVersionChange extends Function {
 export default function useVersionChangeDetection(
   onChange?: () => void
 ): ILookForVersionChange {
-  const interval = +(
-    /** @type {string} */ import.meta.env.VITE_APP_VERSION_POLL_INTERVAL
-  );
-  const initial = import.meta.env.VITE_APP_VERSION;
+  const interval = +import.meta.env.VITE_APP_VERSION_POLL_INTERVAL || 0;
+  const initialVersion = import.meta.env.VITE_APP_VERSION;
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
-  let timeout: NodeJS.Timeout;
-
-  const check = useCallback(async () => {
+  const checkVersion = useCallback(async () => {
     if (import.meta.env.DEV || import.meta.env.SSR) return false;
 
-    clearTimeout(timeout);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-    if (interval) timeout = setTimeout(check, interval);
+    if (interval) {
+      timeoutRef.current = setTimeout(checkVersion, interval);
+    }
 
-    const file = import.meta.env.VITE_APP_VERSION_FILE;
-    const base = import.meta.env.BASE_URL || "/";
-    const fetchUrl = base === "/" ? `/${file}` : `${base}/${file}`;
+    const versionFile = import.meta.env.VITE_APP_VERSION_FILE;
+    const baseUrl = import.meta.env.BASE_URL || "/";
+    const fetchUrl = `${baseUrl}${versionFile}`;
 
-    const res = await fetch(fetchUrl, {
-      headers: {
-        pragma: "no-cache",
-        "cache-control": "no-cache",
-      },
-    });
+    try {
+      const response = await fetch(fetchUrl, {
+        headers: {
+          pragma: "no-cache",
+          "cache-control": "no-cache",
+        },
+      });
 
-    if (res.ok) {
-      const { version } = await res.json();
-      const updated = version !== initial;
-
-      if (updated) {
-        onChange && onChange();
-        clearTimeout(timeout);
+      if (!response.ok) {
+        throw new Error(`Version check failed: ${response.status}`);
       }
 
-      return updated;
-    } else {
-      throw new Error(`Version check failed: ${res.status}`);
+      const { version } = await response.json();
+      const isUpdated = version !== initialVersion;
+
+      if (isUpdated && onChange) {
+        onChange();
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      }
+
+      return isUpdated;
+    } catch (error) {
+      console.error(error);
+      return false;
     }
-  }, []);
+  }, [initialVersion, interval, onChange]);
 
   useEffect(() => {
-    if (interval) timeout = setTimeout(check, interval);
+    if (interval) {
+      timeoutRef.current = setTimeout(checkVersion, interval);
+    }
 
     return () => {
-      clearTimeout(timeout);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
-  }, []);
+  }, [checkVersion, interval]);
 
-  return check;
+  return checkVersion;
 }
