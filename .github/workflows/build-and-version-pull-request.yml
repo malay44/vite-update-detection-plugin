@@ -7,7 +7,7 @@ on:
 
 env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+  REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build-and-version-pull-request:
