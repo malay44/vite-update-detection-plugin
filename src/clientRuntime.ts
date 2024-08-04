@@ -1,9 +1,11 @@
-interface ILookForVersionChange {
-  check: () => Promise<boolean>;
+import { useEffect } from "react";
+
+interface ILookForVersionChange extends Function {
+  (): Promise<boolean>;
 }
 
-export default function lookForVersionChange(
-  onChange: () => void
+export default function useVersionChangeDetection(
+  onChange?: () => void
 ): ILookForVersionChange {
   const interval = +(
     /** @type {string} */ import.meta.env.VITE_APP_VERSION_POLL_INTERVAL
@@ -35,7 +37,7 @@ export default function lookForVersionChange(
       const updated = version !== initial;
 
       if (updated) {
-        onChange();
+        onChange && onChange();
         clearTimeout(timeout);
       }
 
@@ -45,9 +47,13 @@ export default function lookForVersionChange(
     }
   }
 
-  if (interval) timeout = setTimeout(check, interval);
+  useEffect(() => {
+    if (interval) timeout = setTimeout(check, interval);
 
-  return {
-    check,
-  };
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  return check;
 }

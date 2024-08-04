@@ -1,4 +1,4 @@
-import type { Plugin } from "vite";
+import type { PluginOption } from "vite";
 import fs from "node:fs";
 import path from "path";
 
@@ -7,24 +7,19 @@ export type VitePluginVersionOptions = {
   pollInterval?: number;
 };
 
+const versionFile = "version.json";
+
 function vitePluginVersion({
   version,
   pollInterval,
-}: VitePluginVersionOptions): Plugin {
+}: VitePluginVersionOptions): PluginOption {
   return {
-    name: "vite-plugin-version",
-    version: "0.0.0",
+    name: "vite-plugin-update-detection",
+    version: "0.0.1",
     apply(config, env) {
-      if (!config.build?.outDir) {
-        console.error("vite-plugin-version: No output directory found");
-        return false;
-      }
       if (env.command === "build" && !config.build?.ssr) {
         process.env.VITE_APP_VERSION = version;
-        process.env.VITE_APP_VERSION_FILE = path.resolve(
-          config.build.outDir,
-          "version.json"
-        );
+        process.env.VITE_APP_VERSION_FILE = versionFile;
         process.env.VITE_APP_VERSION_POLL_INTERVAL = `${pollInterval}`;
         return true;
       }
@@ -33,12 +28,14 @@ function vitePluginVersion({
     writeBundle: {
       sequential: true,
       order: "post",
-      handler() {
-        const file = process.env.VITE_APP_VERSION_FILE;
-        if (!file) {
-          console.error("vite-plugin-version: version file path not found");
+      handler({ dir }) {
+        if (!dir) {
+          console.error(
+            "vite-plugin-update-detection: version file path not found"
+          );
           return;
         }
+        const file = path.join(dir, versionFile);
         const serializedVersion = JSON.stringify({ version });
         fs.writeFileSync(file, serializedVersion);
       },
