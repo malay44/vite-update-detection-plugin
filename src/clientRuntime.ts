@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 interface ILookForVersionChange extends Function {
   (): Promise<boolean>;
@@ -14,7 +14,7 @@ export default function useVersionChangeDetection(
 
   let timeout: NodeJS.Timeout;
 
-  async function check() {
+  const check = useCallback(async () => {
     if (import.meta.env.DEV || import.meta.env.SSR) return false;
 
     clearTimeout(timeout);
@@ -45,7 +45,7 @@ export default function useVersionChangeDetection(
     } else {
       throw new Error(`Version check failed: ${res.status}`);
     }
-  }
+  }, []);
 
   useEffect(() => {
     if (interval) timeout = setTimeout(check, interval);
