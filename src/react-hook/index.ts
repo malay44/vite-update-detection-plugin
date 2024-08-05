@@ -5,7 +5,7 @@ interface ILookForVersionChange extends Function {
 }
 
 export default function useVersionChangeDetection(
-  onChange?: () => void
+  onChange?: (newVersion: string) => void
 ): ILookForVersionChange {
   const interval = +import.meta.env.VITE_APP_VERSION_POLL_INTERVAL || 0;
   const initialVersion = import.meta.env.VITE_APP_VERSION;
@@ -42,7 +42,7 @@ export default function useVersionChangeDetection(
       const isUpdated = version !== initialVersion;
 
       if (isUpdated && onChange) {
-        onChange();
+        onChange(version);
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
