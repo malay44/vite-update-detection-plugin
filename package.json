@@ -2,10 +2,26 @@
   "name": "vite-plugin-update-detection",
   "version": "0.1.1",
   "type": "module",
-  "main": "dist/plugin.js",
-  "types": "dist/plugin.d.ts",
+  "main": "dist/plugin/index.js",
+  "types": "dist/plugin/index.d.ts",
+  "exports": {
+    "./plugin": {
+      "import": "./dist/plugin/index.js",
+      "require": "./dist/plugin/index.js"
+    },
+    "./react-hook": {
+      "import": "./dist/react-hook/index.js",
+      "require": "./dist/react-hook/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
-    "vite-plugin"
+    "vite",
+    "plugin",
+    "version-detection",
+    "react-hook"
   ],
   "scripts": {
     "build": "tsc",
@@ -22,5 +38,6 @@
   "peerDependencies": {
     "react": "^18.3.1",
     "vite": "^5.3.4"
-  }
+  },
+  "author": "@malay44"
 }
